@@ -1,0 +1,10 @@
+model User {
+    id Int @id @default(autoincrement())
+    name String
+    documentNumber String
+    email String @unique
+    password String
+    createdAt DateTime @default(now())
+    updateAt DateTime @updatedAt
+    active Boolean @default(true)
+}
