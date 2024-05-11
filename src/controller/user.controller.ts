@@ -1,8 +1,9 @@
-import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, HttpStatus, InternalServerErrorException, NotFoundException, Param, Post, Put } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { User } from "@prisma/client";
-import { CreateUser, UpdateUser } from "src/interface/user.interface";
+import { IUserCreate, IUserResponse, IUserUpdate } from "src/interface/user.interface";
 import { UserService } from "src/service/user.service";
 import * as bcrypt from 'bcrypt';
+import { AuthGuard } from "src/guard/auth.guard";
 @Controller("/user")
 export class UserController {
     constructor(private readonly userService: UserService) { }
@@ -14,10 +15,8 @@ export class UserController {
     }
 
     @Post()
-    async create(@Body() data: CreateUser): Promise<string>{
-        data.password = await this.encryptPassword(data.password)
-        console.log(data);
-        
+    async create(@Body() data: IUserCreate): Promise<string>{
+        data.password = await this.encryptPassword(data.password)     
         try {
             await this.userService.create(data);
             return "ok";
@@ -28,8 +27,9 @@ export class UserController {
         }
     }
 
+    @UseGuards(AuthGuard)
     @Get("/:id")
-    async get(@Param('id') id: number): Promise<User> {
+    async get(@Param('id') id: number): Promise<any> {
         id = Number(id)
         const userDB = await this.userService.get({ id })
         if (!userDB || !userDB.active) {
@@ -37,20 +37,22 @@ export class UserController {
         }
         return userDB;
     }
-
+    
+    @UseGuards(AuthGuard)
     @Get("/")
     async find(): Promise<User[]> {
         const userDB = await this.userService.find();
-
+        
         if (userDB.length == 0) {
             return []
         }
-
+        
         return userDB;
     }
-
+    
+    @UseGuards(AuthGuard)
     @Put("/:id")
-    async update(@Param('id') id: number, @Body() data: UpdateUser): Promise<string> {
+    async update(@Param('id') id: number, @Body() data: IUserUpdate): Promise<string> {
         id = Number(id)
         try {
             await this.userService.update(id, data)
@@ -62,7 +64,8 @@ export class UserController {
             throw new InternalServerErrorException()
         }
     }
-
+    
+    @UseGuards(AuthGuard)
     @Delete("/:id")
     async delete(@Param('id') id: number): Promise<string> {
         id = Number(id)

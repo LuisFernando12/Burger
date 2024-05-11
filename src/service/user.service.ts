@@ -14,13 +14,20 @@ export class UserService {
 
     async get(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
         return this.prisma.user.findUnique({
-            where: userWhereUniqueInput
+            where: userWhereUniqueInput,
+            select:{
+                name: true,
+                documentNumber: true,
+                email: true,
+                createdAt: true,
+                active: true
+            }   
         });
     }
 
     async find() {
         return this.prisma.user.findMany({
-            where: { active: true }
+            where: { active: true },
         });
     }
     async update(id: number, data: Prisma.UserUpdateInput) {

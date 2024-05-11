@@ -14,17 +14,21 @@ datasource db {
 }
 
 model User {
-    id Int @id @default(autoincrement())
-    name String
+    id             Int @id @default(autoincrement())
+    name           String
     documentNumber String @unique
-    email String @unique
-    password String
-    createdAt DateTime @default(now())
-    updateAt DateTime @updatedAt
-    active Boolean @default(true)
+    email          String @unique
+    password       String
+    createdAt      DateTime @default(now())
+    updateAt       DateTime @updatedAt
+    active         Boolean @default(true)
+    access_token   Token?
 }
 
-model Test{
-  id Int @id @default(autoincrement())
-  name String
+model Token{
+    id      Int @id @default(autoincrement())
+    access_token   String @unique
+    expireIn Int
+    user    User @relation(fields: [userId], references: [id])
+    userId  Int @unique
 }

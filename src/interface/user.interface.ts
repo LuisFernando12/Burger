@@ -1,21 +1,19 @@
-export interface CreateUser{
+export interface IUserCreate{
     name: string,
     documentNumber: string,
     email: string,
     password: string
 }
-export interface UpdateUser{
+export interface IUserUpdate{
     name: string | null,
     documentNumber: string | null,
     email: string | null,
 }
-// export type  User={
-//     id: number;
-//     name: string;
-//     documentNumber: string;
-//     email: string;
-//     password: string;
-//     createdAt: Date;
-//     updateAt: Date;
-//     active: boolean;
-// }
+
+export interface IUserResponse{
+    name: string,
+    documentNumber: string,
+    email: string,
+    createdAt: Date,
+    active: boolean
+}
