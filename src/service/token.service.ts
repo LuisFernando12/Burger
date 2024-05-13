@@ -1,6 +1,6 @@
 import { IRefreshToken } from "src/interface/refreshToken.interface"
 import { PrismaService } from "./prisma.service"
-import { IGeneretedToken, IToken, ITokenUpdate } from "src/interface/token.interface";
+import { IGenereteToken, ISaveToken, IToken, ITokenUpdate } from "src/interface/token.interface";
 import { JwtService } from "@nestjs/jwt";
 import { ForbiddenException, Injectable, InternalServerErrorException } from "@nestjs/common";
 import {TokenWhereUniqueInput } from 'prisma'
@@ -11,7 +11,7 @@ export class TokenService {
         private jwtService: JwtService
     ) { }
 
-    private async generateToken(payload: any)
+    private async generateToken(payload: IGenereteToken)
         : Promise<string> {
         const access_token = await this.jwtService.signAsync(payload);
         return access_token;
@@ -24,11 +24,11 @@ export class TokenService {
         return expireIn
     }
 
-    async refreshToken({ oldToken }: IRefreshToken) {
+    async refreshToken({ oldToken }: IRefreshToken) : Promise<IToken> {
         return await this.saveToken({ token: oldToken });
     }
 
-    async saveToken({ userId, token }: IGeneretedToken) {
+    async saveToken({ userId, token }: ISaveToken) : Promise<IToken> {
         let where: TokenWhereUniqueInput = {};
         if (!token) {
             where['userId'] = userId
@@ -66,11 +66,12 @@ export class TokenService {
                 expireIn: this.generateExpireIn(),
             }
 
-            const updateTokenDB = await this.prisma.token.update({
+            const tokenUpdateDB = await this.prisma.token.update({
                 where: { id: tokenDB.id, userId: tokenDB.userId },
                 data
             })
-            return updateTokenDB
+            const { id: _, ...result } = tokenUpdateDB
+            return result
         }
         throw new InternalServerErrorException()
     }

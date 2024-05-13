@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, InternalServerErrorException, NotFoundException, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { User } from "@prisma/client";
-import { IUserCreate, IUserResponse, IUserUpdate } from "src/interface/user.interface";
+import { IUserCreate, IUserUpdate } from "src/interface/user.interface";
 import { UserService } from "src/service/user.service";
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from "src/guard/auth.guard";
@@ -17,10 +17,10 @@ export class UserController {
     @Post()
     async create(@Body() data: IUserCreate): Promise<string>{
         data.password = await this.encryptPassword(data.password)     
-        try {
+        try {          
             await this.userService.create(data);
             return "ok";
-        } catch (error) {
+        } catch (error) {           
             if (error.meta && error.meta.target) {
                 throw new BadRequestException(`Verifique os dados enviados e tente novamente`)
             }
@@ -31,7 +31,7 @@ export class UserController {
     @Get("/:id")
     async get(@Param('id') id: number): Promise<any> {
         id = Number(id)
-        const userDB = await this.userService.get({ id })
+        const userDB = await this.userService.get(id);        
         if (!userDB || !userDB.active) {
             throw new NotFoundException()
         }

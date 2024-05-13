@@ -8,7 +8,12 @@ export interface ITokenUpdate{
     expireIn: number,
 }
 
-export interface IGeneretedToken{
+export interface ISaveToken{
     userId?: number,
     token?: string | null
+}
+export interface IGenereteToken{
+    sub: number,
+    username: string,
+    name:string
 }
