@@ -1,3 +1,3 @@
-export interface IRefreshToken{
-    oldToken: string,
+export interface IRefreshToken {
+  oldToken: string;
 }
