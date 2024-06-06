@@ -4,6 +4,7 @@
 /build
 /test
 /prisma/migrations
+/public/dist
 
 # Logs
 logs
