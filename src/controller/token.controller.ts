@@ -7,11 +7,13 @@ import {
   Post,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IRefreshToken } from 'src/interface/refreshToken.interface';
+import { RefreshToken } from 'src/dto/refreshToken.dto';
 import { TokenService } from 'src/service/token.service';
-import { IToken } from 'src/interface/token.interface';
+import { TokenDTO } from 'src/dto/token.dto';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('/token')
+@ApiTags('Token')
 export class TokenController {
   constructor(
     private tokenService: TokenService,
@@ -19,7 +21,8 @@ export class TokenController {
   ) {}
   @HttpCode(HttpStatus.OK)
   @Post('/refresh')
-  async refreshToken(@Body() data: IRefreshToken): Promise<IToken> {
+  @ApiCreatedResponse({ type: TokenDTO })
+  async refreshToken(@Body() data: RefreshToken): Promise<TokenDTO> {
     const token = await this.tokenService.refreshToken(data);
     if (token) {
       return token;

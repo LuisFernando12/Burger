@@ -2,7 +2,7 @@ import { TokenService } from 'src/service/token.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import * as bcrypt from 'bcrypt';
-import { Login as ILogin } from 'src/interface/login.interface';
+import { Login as ILogin } from 'src/dto/login.dto';
 @Injectable()
 export class AuthService {
   constructor(

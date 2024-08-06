@@ -11,12 +11,17 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
-import { IUserCreate, IUserUpdate } from 'src/interface/user.interface';
+import {
+  CreateUserDTO,
+  UserResponseDTO,
+  UserUpdateDTO,
+} from 'src/interface/user.interface';
 import { UserService } from 'src/service/user.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/guard/auth.guard';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 @Controller('/user')
+@ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -27,48 +32,49 @@ export class UserController {
   }
 
   @Post()
-  async create(@Body() data: IUserCreate): Promise<string> {
+  @ApiCreatedResponse({ type: 'string' })
+  async create(@Body() data: CreateUserDTO): Promise<string> {
     data.password = await this.encryptPassword(data.password);
     try {
       await this.userService.create(data);
       return 'ok';
     } catch (error) {
       if (error.meta && error.meta.target) {
-        throw new BadRequestException(
-          `Verifique os dados enviados e tente novamente`,
-        );
+        throw new BadRequestException('Ivalid params');
       }
     }
   }
 
   @UseGuards(AuthGuard)
   @Get('/:id')
-  async get(@Param('id') id: number): Promise<any> {
+  @ApiCreatedResponse({ type: UserResponseDTO })
+  async get(@Param('id') id: number): Promise<UserResponseDTO> {
     id = Number(id);
     const userDB = await this.userService.get(id);
-    if (!userDB || !userDB.active) {
+    if (!userDB) {
       throw new NotFoundException();
     }
     return userDB;
   }
 
   // @UseGuards(AuthGuard)
-  @Get('/')
-  async find(): Promise<User[]> {
-    const userDB = await this.userService.find();
+  // @Get('/')
+  // async find(): Promise<User[]> {
+  //   const userDB = await this.userService.find();
 
-    if (userDB.length == 0) {
-      return [];
-    }
+  //   if (userDB.length == 0) {
+  //     return [];
+  //   }
 
-    return userDB;
-  }
+  //   return userDB;
+  // }
 
   @UseGuards(AuthGuard)
   @Put('/:id')
+  @ApiCreatedResponse({ type: 'string' })
   async update(
     @Param('id') id: number,
-    @Body() data: IUserUpdate,
+    @Body() data: UserUpdateDTO,
   ): Promise<string> {
     id = Number(id);
     try {
@@ -84,6 +90,7 @@ export class UserController {
 
   @UseGuards(AuthGuard)
   @Delete('/:id')
+  @ApiCreatedResponse({ type: 'string' })
   async delete(@Param('id') id: number): Promise<string> {
     id = Number(id);
     try {

@@ -6,8 +6,6 @@ import { TokenModule } from './token.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ProductModule } from './product.module';
 import { RequestModule } from './request.module';
-import { AppController } from 'src/controller/app.controller';
-import { AppService } from 'src/service/app.service';
 
 @Module({
   imports: [
@@ -23,8 +21,6 @@ import { AppService } from 'src/service/app.service';
     ProductModule,
     RequestModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
   exports: [JwtModule],
 })
 export class AppModule {}

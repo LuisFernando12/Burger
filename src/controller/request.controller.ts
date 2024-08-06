@@ -8,21 +8,24 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Token } from 'src/decorators/token.decorator';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { ICreateRequest, IRequest } from 'src/interface/request.interface';
+import { CreateRequestDTO, RequestResponseDTO } from 'src/dto/request.dto';
 import { RequestService } from 'src/service/request.service';
 
 @Controller('/request')
+@ApiTags('Request')
 export class RequestController {
   constructor(private readonly requestService: RequestService) {}
 
   @Post('/')
   @UseGuards(AuthGuard)
+  @ApiCreatedResponse({ type: RequestResponseDTO })
   async create(
-    @Body() request: ICreateRequest,
+    @Body() request: CreateRequestDTO,
     @Token() token: string,
-  ): Promise<IRequest> {
+  ): Promise<RequestResponseDTO> {
     if (request) {
       try {
         return await this.requestService.create(request, token);
@@ -35,10 +38,11 @@ export class RequestController {
 
   @Get('/:id')
   @UseGuards(AuthGuard)
+  @ApiCreatedResponse({ type: RequestResponseDTO })
   async getRequest(
     @Param('id') id: number,
     @Token() token: string,
-  ): Promise<IRequest> {
+  ): Promise<RequestResponseDTO> {
     if (id) {
       try {
         return await this.requestService.get(Number(id), token);
@@ -50,10 +54,11 @@ export class RequestController {
   }
   @Get('/user/:userId')
   @UseGuards(AuthGuard)
+  @ApiCreatedResponse({ type: [RequestResponseDTO] })
   async findRequestByUser(
     @Param('userId') userId: number,
     @Token() token: string,
-  ): Promise<IRequest[]> {
+  ): Promise<RequestResponseDTO[]> {
     if (userId) {
       try {
         return await this.requestService.findRequestByUser(

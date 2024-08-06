@@ -1,17 +1,18 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Token } from 'src/decorators/token.decorator';
 import { AuthGuard } from 'src/guard/auth.guard';
-import { IProduct } from 'src/interface/product.interface';
+import { ProductDTO } from 'src/dto/product.dto';
 import { ProductService } from 'src/service/product.service';
 
 @Controller('/product')
+@ApiTags('Product')
 export class ProductController {
   constructor(private productService: ProductService) {}
   @Get('/')
-  @UseGuards(AuthGuard)
-  @UseGuards(AuthGuard)
-  async findAll(@Token() token: string): Promise<IProduct[]> {
-    return await this.productService.findAll(token);
+  @ApiCreatedResponse({ type: [ProductDTO] })
+  async findAll(): Promise<ProductDTO[]> {
+    return await this.productService.findAll();
   }
   @Get('/example')
   @UseGuards(AuthGuard)
@@ -19,11 +20,8 @@ export class ProductController {
     return `token: ${token}`;
   }
   @Get('/:id')
-  @UseGuards(AuthGuard)
-  async getProduct(
-    @Param('id') id: number,
-    @Token() token: string,
-  ): Promise<IProduct> {
-    return await this.productService.get(Number(id), token);
+  @ApiCreatedResponse({ type: ProductDTO })
+  async getProduct(@Param('id') id: number): Promise<ProductDTO> {
+    return await this.productService.get(Number(id));
   }
 }

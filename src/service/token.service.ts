@@ -1,18 +1,18 @@
-import { IRefreshToken } from 'src/interface/refreshToken.interface';
+import { RefreshToken } from 'src/dto/refreshToken.dto';
 import { PrismaService } from './prisma.service';
-import {
-  IGenereteToken,
-  ISaveToken,
-  IToken,
-  ITokenUpdate,
-} from 'src/interface/token.interface';
+import { GenereteTokenDTO, SaveTokenDTO, TokenDTO } from 'src/dto/token.dto';
 import { JwtService } from '@nestjs/jwt';
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { TokenWhereUniqueInput } from 'prisma';
+interface ITokenUpdate {
+  access_token: string;
+  expireIn: number;
+}
 @Injectable()
 export class TokenService {
   constructor(
@@ -20,7 +20,7 @@ export class TokenService {
     private jwtService: JwtService,
   ) {}
 
-  private async generateToken(payload: IGenereteToken): Promise<string> {
+  private async generateToken(payload: GenereteTokenDTO): Promise<string> {
     const access_token = await this.jwtService.signAsync(payload);
     return access_token;
   }
@@ -32,16 +32,18 @@ export class TokenService {
     return expireIn;
   }
 
-  async refreshToken({ oldToken }: IRefreshToken): Promise<IToken> {
+  async refreshToken({ oldToken }: RefreshToken): Promise<TokenDTO> {
     return await this.saveToken({ token: oldToken });
   }
 
-  async saveToken({ userId, token }: ISaveToken): Promise<IToken> {
+  async saveToken({ userId, token }: SaveTokenDTO): Promise<TokenDTO> {
     const where: TokenWhereUniqueInput = {};
-    if (!token) {
+    if (!token && userId) {
       where['userId'] = userId;
-    } else {
+    } else if (!userId && token) {
       where['access_token'] = token;
+    } else {
+      throw new BadRequestException('Inavalid Params');
     }
     const tokenDB = await this.prisma.token.findUnique({
       where: where,
@@ -56,16 +58,22 @@ export class TokenService {
         username: userDB.email,
         name: userDB.name,
       };
-      const data: IToken = {
+      const data: TokenDTO = {
         access_token: await this.generateToken(payload),
         expireIn: this.generateExpireIn(),
         userId: userId,
       };
-      const tokenCreateDB = await this.prisma.token.create({
-        data,
-      });
-      const { id: _, ...result } = tokenCreateDB;
-      return result;
+      try {
+        const tokenCreateDB = await this.prisma.token.create({
+          data,
+        });
+        delete tokenCreateDB.userId;
+        delete tokenCreateDB.id;
+        return tokenCreateDB;
+      } catch (error) {
+        console.log(error);
+        throw new ForbiddenException();
+      }
     }
     if (tokenDB) {
       const payload = {
@@ -89,8 +97,9 @@ export class TokenService {
         where: { id: tokenDB.id, userId: tokenDB.userId },
         data,
       });
-      const { id: _, ...result } = tokenUpdateDB;
-      return result;
+      delete tokenUpdateDB.userId;
+      delete tokenUpdateDB.id;
+      return tokenUpdateDB;
     }
     throw new InternalServerErrorException();
   }
