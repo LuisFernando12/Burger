@@ -22,7 +22,8 @@ export class AuthService {
     });
     if (userDB) {
       const { password: hash } = userDB;
-      if (this.comparePassword(password, hash)) {
+      const passwordIsValid = await this.comparePassword(password, hash);
+      if (passwordIsValid) {
         const payload = { userId: userDB.id };
         const access_token = await this.tokenService.saveToken(payload);
         if (!access_token) {
@@ -30,8 +31,7 @@ export class AuthService {
         }
         return access_token;
       }
-    } else {
-      throw new UnauthorizedException();
     }
+    throw new UnauthorizedException();
   }
 }

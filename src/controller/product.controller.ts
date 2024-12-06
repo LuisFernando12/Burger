@@ -1,9 +1,9 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { Token } from 'src/decorators/token.decorator';
-import { AuthGuard } from 'src/guard/auth.guard';
 import { ProductDTO } from 'src/dto/product.dto';
 import { ProductService } from 'src/service/product.service';
+
+type Category = 'FOOD' | 'DRINK' | 'DESSERT';
 
 @Controller('/product')
 @ApiTags('Product')
@@ -14,10 +14,14 @@ export class ProductController {
   async findAll(): Promise<ProductDTO[]> {
     return await this.productService.findAll();
   }
-  @Get('/example')
-  @UseGuards(AuthGuard)
-  example(@Token() token: string): string {
-    return `token: ${token}`;
+  @Get('/category/:category')
+  @ApiCreatedResponse({ type: [ProductDTO] })
+  async findByCategory(
+    @Param('category') category: Category,
+  ): Promise<ProductDTO[]> {
+    return await this.productService.findByCategory(
+      category.toUpperCase() as Category,
+    );
   }
   @Get('/:id')
   @ApiCreatedResponse({ type: ProductDTO })

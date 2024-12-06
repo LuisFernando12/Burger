@@ -10,7 +10,7 @@ export class RequestService {
   private async generateClientToken(token: string): Promise<string> {
     const { data } = await firstValueFrom(
       this.httpService
-        .post(`${process.env.INTERNAL_API}/token`, {
+        .post(`${process.env.INTERNAL_API}/auth/token/client`, {
           token,
         })
         .pipe(
@@ -30,10 +30,11 @@ export class RequestService {
     const { data } = await firstValueFrom(
       this.httpService
         .post(`${process.env.INTERNAL_API}/request`, request, {
-          headers: { Authorization: clientToken },
+          headers: { Authorization: `Bearer ${clientToken}` },
         })
         .pipe(
           catchError((error: AxiosError) => {
+            console.log(error.response.data);
             throw new InternalServerErrorException(error);
           }),
         ),
@@ -49,7 +50,7 @@ export class RequestService {
     const { data } = await firstValueFrom(
       this.httpService
         .get(`${process.env.INTERNAL_API}/request/client/${userId}`, {
-          headers: { Authorization: clientToken },
+          headers: { Authorization: `Bearer ${clientToken}` },
         })
         .pipe(
           catchError((error: AxiosError) => {
@@ -64,7 +65,7 @@ export class RequestService {
     const { data } = await firstValueFrom(
       this.httpService
         .get(`${process.env.INTERNAL_API}/request/${id}`, {
-          headers: { Authorization: clientToken },
+          headers: { Authorization: `Bearer ${clientToken}` },
         })
         .pipe(
           catchError((error: AxiosError) => {

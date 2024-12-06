@@ -15,7 +15,7 @@ import {
   CreateUserDTO,
   UserResponseDTO,
   UserUpdateDTO,
-} from 'src/interface/user.interface';
+} from 'src/dto/user.dto';
 import { UserService } from 'src/service/user.service';
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from 'src/guard/auth.guard';
